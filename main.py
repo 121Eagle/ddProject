@@ -1,29 +1,28 @@
-import argparse # don't remove me
-from os import path
+import sys # don't remove me
 from dd import dd
 
-if __name__ == "__main__": # don't remove this line
+args = sys.argv
+# set all options to null for the start
+j={}
 
-    p = argparse.ArgumentParser() # don't remove this line either
-
-    ### EDIT THESE AS NEEDED ###
-    p.add_argument("input", type=str, action="store", metavar='if=', help="read from file")
-    p.add_argument("output", type=str, action="store", metavar='of=', help="write to file")
-    p.add_argument("blocksize", type=str, nargs='?', action="store", metavar='bs=', help="blocksize", default='bs=512')
-    p.add_argument("count", type=int, required=False, nargs='?', action='store', metavar='count=')
-    p.add_argument('conv', type=str, action='store', metavar='conv=', choices=('ucase','lcase','sparce'))
-    ############################
-
-    args = p.parse_args()
-
-    ### YOUR LOGIC BELOW ###
-    variables = vars(args)
-    variables.update({x:variables[x].split('=')[1] for x in variables.keys()})
-    print(variables)
-
-    if (path.exists(args.input) and path.exists(args.output)):
-        if (not path.isfile(args.input)) and (not path.isfile(args.input)):
-            raise Exception("Given path is not a file!")
-    else:
-        raise Exception("Given path does not exist!")
-    dd(**variables)
+for arg in args:
+    ##loop through each argument to the tool, and parse the option
+    start = lambda string: arg.startswith(string+'=')
+    options = ['if','of','bs','count','skip','seek','conv']
+    ##I was lazy and put every option as an array
+    if start(options[0]):
+        inFile = arg[len(options[0]+'='):]
+    if start(options[1]):
+        outFile = arg[len(options[1]+'='):]
+    if start(options[2]):
+        j.update({'blockSize':arg[len(options[2]+'='):]})
+    if start(options[3]):
+        countNum = arg[len(options[3]+'='):]
+        j.update({'count':arg[len(options[3]+'='):]})
+    if start(options[4]):
+        j.update({'skip':arg[len(options[4]+'='):]})
+    if start(options[5]):
+        j.update({options[5]:arg[len(options[5]+'='):]})
+    if start(options[6]):
+        j.update({options[5]:arg[len(options[5]+'='):].split(',')})
+dd(inFile,outFile,**j)
